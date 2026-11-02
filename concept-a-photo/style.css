@@ -1,0 +1,315 @@
+/* ── Brand tokens — the ONLY place colors are defined. Set --dark,
+   --navy, --accent and --gold from the company's real site; the rest
+   derive from them (color-mix: Chrome 111+ / Safari 16.2+). ── */
+:root {
+  --dark:      #060e33;
+  --dark-2:    color-mix(in srgb, var(--dark) 70%, black);
+  --navy:      #101b62;
+  --accent:    #9ab4ff;
+  --accent-d:  color-mix(in srgb, var(--accent) 82%, black);
+  --accent-lt: color-mix(in srgb, var(--accent) 62%, white);
+  --gold:      #ffbeb9;
+  --gold-d:    color-mix(in srgb, var(--gold) 85%, black);
+  --white:     #ffffff;
+  --cta-ink:   #060e33;  /* text on the accent CTA — set to var(--dark-2) if white fails contrast on a light accent */
+  --font-head: 'Alegreya', Georgia, serif;
+  --font:      'DM Sans', system-ui, sans-serif;
+  --mono:      'Kode Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --ease:      cubic-bezier(0.16,1,0.3,1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:300px; height:600px; overflow:hidden; background:var(--dark); }
+body { font-family:var(--font); -webkit-font-smoothing:antialiased; }
+a { text-decoration:none; color:inherit; }
+button { border:0; background:none; font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+
+/* ── Canvas ─────────────────────────────────────────────────────────
+   Fixed 300x600 stage. A crossfading slide stack sits at the bottom of
+   the z-order; persistent chrome (logo, nav, stats, CTA) is pinned on
+   top of it and never rotates — same "fixed shell / rotating cards"
+   split the Knorex reference banner used with royalSlider. */
+#banner {
+  position:relative;
+  width:300px;
+  height:600px;
+  overflow:hidden;
+  cursor:pointer;
+  background:var(--dark);
+}
+
+/* ── Slide stack ────────────────────────────────────────────────── */
+#slides { position:absolute; inset:0; z-index:1; }
+
+.slide {
+  position:absolute;
+  inset:0;
+  opacity:0;
+  z-index:1;
+  pointer-events:none;
+  transition:opacity 0.9s ease;
+}
+.slide.active { opacity:1; z-index:2; pointer-events:auto; }
+
+.slide-bg {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  object-position:center 20%;
+  z-index:1;
+  animation:kenburns 7s ease-out infinite alternate;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+@keyframes kenburns {
+  from { transform:scale(1); }
+  to   { transform:scale(1.09); }
+}
+
+.slide-scrim-top, .slide-scrim-bottom {
+  position:absolute;
+  left:0; right:0;
+  z-index:2;
+  pointer-events:none;
+}
+.slide-scrim-top {
+  top:0; height:190px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--dark-2) 94%, transparent) 0%, color-mix(in srgb, var(--dark-2) 62%, transparent) 55%, color-mix(in srgb, var(--dark-2) 0%, transparent) 100%);
+}
+.slide-scrim-bottom {
+  bottom:0; height:336px;
+  background:linear-gradient(0deg, var(--dark) 0%, color-mix(in srgb, var(--dark) 93%, transparent) 42%, color-mix(in srgb, var(--dark) 0%, transparent) 100%);
+}
+
+.slide-copy {
+  position:absolute;
+  inset:0;
+  z-index:3;
+  transform:translateY(12px);
+  transition:transform 0.9s var(--ease);
+}
+.slide.active .slide-copy { transform:translateY(0); }
+
+/* Floating mid-image stat chip (per slide) */
+.mid-chip {
+  position:absolute;
+  top:258px; left:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 13px 9px 11px;
+  background:color-mix(in srgb, var(--dark) 58%, transparent);
+  border-left:3px solid var(--accent);
+  border-radius:0 3px 3px 0;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+.chip-num {
+  font-family:var(--font-head);
+  font-weight:800;
+  font-size:21px;
+  color:var(--white);
+  white-space:nowrap;
+}
+.chip-num em { font-style:normal; color:var(--accent); }
+.chip-label {
+  font-family:var(--font);
+  font-size:8.4px;
+  line-height:1.25;
+  font-weight:500;
+  color:rgba(255,255,255,0.82);
+}
+
+/* Rotating headline block, pinned above the fixed bottom bar */
+.copy-bottom {
+  position:absolute;
+  left:0; right:0;
+  bottom:150px;
+  padding:0 18px;
+}
+.kicker {
+  font-family:var(--mono);
+  font-weight:600;
+  font-size:8px;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--accent-lt);
+  margin-bottom:6px;
+}
+.copy-bottom h1 {
+  font-family:var(--font-head);
+  font-weight:800;
+  font-size:23px;
+  line-height:1.1;
+  letter-spacing:-0.01em;
+  color:var(--white);
+}
+.copy-bottom h1 em { font-style:normal; color:var(--accent); }
+.copy-bottom p {
+  margin-top:7px;
+  font-size:11px;
+  line-height:1.4;
+  color:rgba(255,255,255,0.8);
+  max-width:255px;
+}
+
+/* ── Persistent chrome (never rotates) ─────────────────────────── */
+#top-bar {
+  position:absolute;
+  top:0; left:0; right:0;
+  z-index:5;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  padding:16px 18px 0;
+}
+#logo { display:flex; align-items:center; gap:7px; }
+#logo .lockup { width:116px; height:17px; display:block; }
+#wordmark {
+  font-family:var(--font-head);
+  font-weight:800;
+  font-size:13.5px;
+  letter-spacing:0.01em;
+  color:var(--white);
+}
+#eyebrow {
+  font-family:var(--mono);
+  font-weight:600;
+  font-size:8.2px;
+  letter-spacing:0.1em;
+  color:var(--accent-lt);
+}
+
+/* arrows ride in the dots row so the 0-258px art zone stays free */
+.nav-arrow {
+  position:absolute;
+  top:-6px;
+  width:24px; height:24px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:color-mix(in srgb, var(--dark) 45%, transparent);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:50%;
+  color:rgba(255,255,255,0.9);
+  transition:background .2s ease, transform .15s ease;
+}
+.nav-arrow svg { width:12px; height:12px; }
+.nav-arrow:active { transform:scale(0.9); background:color-mix(in srgb, var(--accent) 55%, transparent); }
+#arrow-prev { right:46px; }
+#arrow-next { right:18px; }
+
+#bottom-fixed {
+  position:absolute;
+  left:0; right:0; bottom:0;
+  z-index:5;
+  padding:0 18px 12px;
+}
+
+#dots {
+  display:flex;
+  gap:6px;
+  margin-bottom:10px;
+}
+.dot {
+  width:14px; height:3px;
+  border-radius:2px;
+  background:rgba(255,255,255,0.28);
+  transition:background .3s ease, width .3s ease;
+  padding:6px 0;
+  background-clip:content-box;
+  box-sizing:content-box;
+}
+.dot.active { background-color:var(--accent); width:20px; }  /* background-color, not the shorthand: the shorthand resets background-clip and paints the whole 15px hit area as a square */
+
+
+#cta {
+  margin-top:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:100%;
+  height:40px;
+  background:var(--accent);
+  border-radius:3px;
+  color:var(--cta-ink);
+  font-family:var(--font-head);
+  font-weight:700;
+  font-size:11px;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  animation:cta-pulse 1.8s ease-in-out 2.6s 6;
+}
+#cta-arrow { width:13px; height:13px; }
+
+/* Required disclosure line under the CTA */
+#disclosure {
+  margin:8px -6px 0;
+  font-family:var(--font);
+  font-size:7.3px;
+  letter-spacing:0;
+  line-height:1.2;
+  text-align:left;
+  color:rgba(255,255,255,0.74);
+}
+@keyframes cta-pulse {
+  0%, 100% { box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent); }
+  50%      { box-shadow:0 8px 26px color-mix(in srgb, var(--accent) 65%, transparent), 0 0 0 5px color-mix(in srgb, var(--accent) 12%, transparent); }
+}
+
+/* ── Entrance sequence (initial load only) ─────────────────────── */
+.reveal {
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .7s var(--ease), transform .7s var(--ease);
+}
+#banner.is-live .reveal { opacity:1; transform:none; }
+#top-bar[data-delay="0"] { transition-delay:.05s; }
+#bottom-fixed[data-delay="4"] { transition-delay:.55s; }
+
+#click-tag-wrapper { position:absolute; width:0; height:0; overflow:hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-bg { animation:none; }
+  #cta { animation:none; }
+  .reveal { transition-duration:.01s; transition-delay:0s !important; }
+  .slide, .slide-copy { transition-duration:.2s; }
+}
+
+
+/* ── Motif art (IR page drawing language on dark) ───────────────── */
+.slide-bg.motif { animation:none; background:linear-gradient(180deg, var(--navy) 0%, var(--dark) 62%, var(--dark) 100%); }
+.slide-bg.motif svg { position:absolute; top:0; left:0; }
+.slide-bg.motif::before { content:""; position:absolute; inset:0; background-image:linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size:20px 100%; }
+.slide-scrim-top { height:64px; }
+.motif .m-src { font-family:var(--mono); font-weight:500; font-size:5.9px; letter-spacing:0.05em; fill:rgba(255,255,255,0.58); }
+.motif .m-src.mid { fill:rgba(255,255,255,0.5); }
+.motif .m-src.pink { fill:var(--gold); }
+.motif .m-src.dimmer { fill:rgba(255,255,255,0.32); }
+.motif .m-lab { font-family:var(--font); font-weight:500; font-size:8.4px; fill:rgba(255,255,255,0.88); }
+.motif .m-lab.strong { font-weight:700; fill:#fff; }
+.motif .m-lab.dim { fill:rgba(255,255,255,0.7); }
+.motif .m-tick { font-family:var(--mono); font-weight:500; font-size:6.4px; fill:rgba(255,255,255,0.6); }
+.motif .m-dot { fill:var(--accent); }
+.motif .m-dot.open { fill:none; stroke:var(--gold); stroke-width:1.3; }
+.motif .m-hair { fill:none; stroke:rgba(255,255,255,0.2); stroke-width:1; }
+.motif .m-axis { fill:none; stroke:rgba(255,255,255,0.7); stroke-width:1.3; }
+.motif .m-dash { fill:none; stroke:var(--accent-lt); stroke-width:1; stroke-dasharray:2 3; }
+.motif .m-lane { fill:rgba(255,255,255,0.08); stroke:rgba(255,255,255,0.14); stroke-width:1; }
+.motif .m-topline { fill:url(#hatch); stroke:var(--gold); stroke-width:1.1; stroke-dasharray:3 3; }
+.motif .m-rail { fill:none; stroke:var(--accent-lt); stroke-width:1.3; stroke-dasharray:4 4; opacity:.7; }
+.motif .m-solid { fill:none; stroke:var(--accent); stroke-width:2.2; }
+.motif .m-node { fill:var(--dark); stroke:var(--accent-lt); stroke-width:1.6; }
+.motif .m-node.full { fill:var(--accent); stroke:var(--accent); }
+.motif .m-node.now { fill:#d52130; stroke:#ff7a85; }
+.motif .m-node.now-soft { fill:var(--dark); stroke:var(--gold); stroke-width:1.8; }
+.motif .m-halo { fill:color-mix(in srgb, #d52130 24%, transparent); }
+.motif .m-bar.cash { fill:var(--gold); }
+.motif .m-bar.ops { fill:#c9d6ff; }
+.motif .m-bar.fund { fill:#6f7fc4; }
+.motif .m-bar.cont { fill:url(#hatch); stroke:var(--accent-lt); stroke-width:1.2; stroke-dasharray:4 3; }
+.motif .m-bv { font-family:var(--mono); font-weight:600; font-size:8.6px; fill:#fff; }
